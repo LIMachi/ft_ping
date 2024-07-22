@@ -1,0 +1,6 @@
+/.vscode
+/.deps
+*.d
+/.objs
+*.o
+/ft_ping
