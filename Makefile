@@ -1,6 +1,6 @@
 NAME = ft_ping
 
-SRCS = src/main.c src/print.c
+SRCS = src/main.c src/print.c src/timing.c src/socket.c
 
 INCLUDES = -I src
 OBJS = $(patsubst src/%.c, .objs/%.o, $(SRCS))
@@ -21,7 +21,7 @@ fclean: clean
 	rm -f ${NAME}
 
 re: fclean
-	make
+	make ${NAME}
 
 ${NAME}: ${OBJS}
 	gcc ${INCLUDES} $^ -o $@ -lm
