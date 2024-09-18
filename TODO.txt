@@ -1,0 +1,11 @@
+-- home:
+remove the use of pragma pack (not norm compliant): change how the buffer are writen/read
+fix comments/todos in code
+finish arg system using my code from ft_ssl
+add bonuses
+
+-- 42:
+final norm check
+final checks on virtual machine
+push on schools repo
+grade
