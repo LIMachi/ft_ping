@@ -1,6 +1,6 @@
 NAME = ft_ping
 
-SRCS = src/main.c src/print.c src/timing.c src/socket.c src/print_utils.c src/args.c src/signal.c src/ping.c src/pong.c
+SRCS = src/main.c src/print.c src/timing.c src/socket.c src/print_utils.c src/alloc_less_argv_parser.c src/signal.c src/ping.c src/pong.c
 
 INCLUDES = -I src
 OBJS = $(patsubst src/%.c, .objs/%.o, $(SRCS))

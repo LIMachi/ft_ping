@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "ft_ping.h"
+#include "alloc_less_argv_parser.h"
 
 t_app	*app(void)
 {
@@ -37,9 +38,45 @@ t_exit_code	error(t_exit_code code)
 	return (code);
 }
 
-int	main(int argc, t_str argv[])
+t_exit_code	usage(const char *name)
 {
-	if (parse_args(argc, argv))
+	print_s("Usage\n  ");
+	print_s(name);
+	print_s(" [options] <destination>\n\nOptions:\n"
+		"  <destination>                      "
+		"dns name or ip address\n"
+		"  -h / -u / -? / --help / --usage    "
+		"show this usage\n"
+		"  -v / --verbose                     "
+		"show extra packet information\n"
+		"  -q / --quiet                       "
+		"quiet output (only show statistics at the end)\n\n");
+	return (OK);
+}
+
+int	finalize(void *state, int ret, const int argc, t_csa argv)
+{
+
+}
+
+t_exit_code	args(const int argc, t_csa argv)
+{
+	int							ret;
+	static t_arg_parser_node	root = {0, NULL, NULL};
+
+	if (argc < 2)
+		return (usage(argv[0]));
+	root.choices = (t_arg_parser_choice [4]){
+	{0, 'h', "--help", 0, NULL, &root, NULL},
+	{0, 'q', "--quiet", 0, NULL, &root, NULL},
+	{0, 'v', "--verbose", 0, NULL, &root, NULL},
+	{-1}};
+	return (error(parse_argv(argc, argv, &root, NULL)));
+}
+
+int	main(const int argc, t_str argv[])
+{
+	if (/*parse_args(argc, argv)*/args(argc, argv))
 		return (app()->error);
 	if (app()->target == NULL)
 	{
