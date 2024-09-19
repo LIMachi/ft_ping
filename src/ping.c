@@ -42,17 +42,16 @@ t_exit_code	send_ping(void)
 		.type = ICMP_ECHO,
 		.un.echo = {
 		.id = getpid(),
-		.sequence = app()->sent++
-	}},
-		.timestamp = now()
-	};
+		.sequence = app()->sent++}}};
+	*(t_time*)&packet.raw[PING_H_SZ] = now();
 	packet.header.checksum = checksum(&packet, sizeof(t_ping_packet));
 	if (sendto(app()->sock, &packet, sizeof(t_ping_packet), 0,
 			(const struct sockaddr *)&app()->target_addr,
 			sizeof(struct sockaddr_in)) == -1)
 	{
 		--app()->sent;
-		//TODO: print error
+		print_e((t_str[4]){app()->app_name, ": socket error on send: ",
+				strerror(errno), NULL});
 		app()->error = SOCKET_ERROR;
 		return (SOCKET_ERROR);
 	}

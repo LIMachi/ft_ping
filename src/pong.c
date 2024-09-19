@@ -24,35 +24,47 @@ int	valid_pong(void *packet, ssize_t size)
 	return (0);
 }
 
-t_exit_code	receive_pong(void)
+int	handle_receive_error(ssize_t received)
 {
-	t_ping_msg			buffer;
-	ssize_t				received;
-	t_i64				delta;
-	const struct msghdr	msg_reader = {
-		.msg_iov = (struct iovec [1]){{
-		.iov_base = &buffer,
-		.iov_len = sizeof(buffer)}},
-		.msg_iovlen = 1};
-
-	received = recvmsg(app()->sock, &msg_reader, MSG_DONTWAIT);
 	if (received == -1)
 	{
 		if (errno != EAGAIN && errno != EWOULDBLOCK)
 		{
-			//TODO: error
-			return (error(SOCKET_ERROR));
+			print_e((t_str[4]){app()->app_name, ": socket error on receive: ",
+				strerror(errno), NULL});
+			app()->error = SOCKET_ERROR;
+			return (1);
 		}
-		return (OK);
+		return (1);
 	}
 	if (received <= sizeof(struct iphdr))
 	{
-		//TODO: error
-		return (error(INVALID_MESSAGE));
+		print_e((t_str[3]){app()->app_name, ": malformed/truncated message",
+			NULL});
+		app()->error = INVALID_MESSAGE;
+		return (1);
 	}
-	if (valid_pong(&buffer.packet, received - (ssize_t) sizeof(struct iphdr)))
+	return (0);
+}
+
+t_exit_code	receive_pong(void)
+{
+	t_ping_msg		buffer;
+	ssize_t			received;
+	t_i64			delta;
+	struct msghdr	msg_reader;
+
+	msg_reader = (struct msghdr){
+		.msg_iov = (struct iovec [1]){{
+		.iov_base = &buffer,
+		.iov_len = sizeof(buffer)}},
+		.msg_iovlen = 1};
+	received = recvmsg(app()->sock, &msg_reader, MSG_DONTWAIT);
+	if (handle_receive_error(received))
+		return (app()->error);
+	if (valid_pong(&buffer.raw[IP_H_SZ], received - (ssize_t)IP_H_SZ))
 	{
-		delta = delta_time(buffer.packet.timestamp, now());
+		delta = delta_time(*(t_time*)&buffer.raw[IP_H_SZ + PING_H_SZ], now());
 		insert_pong(delta);
 		if (app()->flags != QUIET)
 			print_pong(received, delta, &buffer);

@@ -72,9 +72,9 @@ void	print_pong(ssize_t size, t_i64 delta, t_ping_msg *msg)
 	print_s(" bytes from ");
 	print_s(app()->resolved_target);
 	print_s(": icmp_seq=");
-	print_u(msg->packet.header.un.echo.sequence);
+	print_u(((t_ping_head*)&msg->raw[IP_H_SZ])->un.echo.sequence);
 	print_s(" ttl=");
-	print_u(msg->ip_header.ttl);
+	print_u(msg->header.ttl);
 	print_s(" time=");
 	print_ms(delta);
 	print_s(" ms\n");

@@ -76,7 +76,7 @@ t_exit_code	args(const int argc, t_csa argv)
 
 int	main(const int argc, t_str argv[])
 {
-	if (/*parse_args(argc, argv)*/args(argc, argv))
+	if (parse_args(argc, argv)/*args(argc, argv)*/)
 		return (app()->error);
 	if (app()->target == NULL)
 	{

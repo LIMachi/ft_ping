@@ -22,7 +22,7 @@ int			strmatch(t_str s1, t_str s2)
 	return (s1[i] == s2[i]);
 }
 
-void	usage(void)
+static void	usage(void)
 {
 	print_s("Usage\n  ");
 	print_s(app()->app_name);

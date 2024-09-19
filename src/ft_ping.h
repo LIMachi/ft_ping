@@ -32,20 +32,27 @@ typedef __uint16_t		t_u16;
 typedef __uint8_t		t_u8;
 typedef const char*		t_str;
 
-///helper typedef to not write 'struct timespec' everywhere
+///helper typedefs to not write 'struct X' everywhere
+//total size: 16 (no matter the platform or endian)
 typedef struct timespec	t_time;
+//total size: u8 * 2 + u16 + u32 so 8
+typedef struct icmphdr	t_ping_head;
+//total size: u8 * 4 + u16 * 4 + u32 * 2 so 20
+typedef struct iphdr	t_ip_head;
 
-# pragma pack(push, 1)
-typedef struct s_ping_packet {
-	struct icmphdr	header;
-	t_time			timestamp;
+# define TIME_SZ 16
+# define PING_H_SZ 8
+# define IP_H_SZ 20
+
+typedef union u_ping_packet {
+	t_u8		raw[PING_H_SZ + TIME_SZ];
+	t_ping_head	header;
 }						t_ping_packet;
 
-typedef struct s_ping_msg {
-	struct iphdr	ip_header;
-	t_ping_packet	packet;
+typedef union u_ping_msg {
+	t_u8		raw[IP_H_SZ + PING_H_SZ + TIME_SZ];
+	t_ip_head	header;
 }						t_ping_msg;
-# pragma pack(pop)
 
 # define NS_US 1000
 # define NS_MS 1000000
@@ -150,7 +157,7 @@ t_exit_code			parse_args(int argc, t_str argv[]);
 
 //ping.c
 ///
-t_u16				checksum(const void *const data, const size_t len);
+t_u16				checksum(const void *data, size_t len);
 ///
 t_exit_code			send_ping(void);
 
