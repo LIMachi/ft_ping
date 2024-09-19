@@ -64,9 +64,9 @@ t_exit_code	receive_pong(void)
 		return (app()->error);
 	if (valid_pong(&buffer.raw[IP_H_SZ], received - (ssize_t)IP_H_SZ))
 	{
-		delta = delta_time(*(t_time*)&buffer.raw[IP_H_SZ + PING_H_SZ], now());
+		delta = delta_time(*(t_time *)&buffer.raw[IP_H_SZ + PING_H_SZ], now());
 		insert_pong(delta);
-		if (app()->flags != QUIET)
+		if ((app()->flags & QUIET) != QUIET)
 			print_pong(received, delta, &buffer);
 	}
 	return (OK);

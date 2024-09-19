@@ -1,6 +1,6 @@
 NAME = ft_ping
 
-SRCS = src/main.c src/print.c src/timing.c src/socket.c src/print_utils.c src/alloc_less_argv_parser.c src/signal.c src/ping.c src/pong.c src/args.c
+SRCS = src/main.c src/print.c src/timing.c src/socket.c src/print_utils.c src/alloc_less_argv_parser.c src/signal.c src/ping.c src/pong.c src/app.c
 
 INCLUDES = -I src
 OBJS = $(patsubst src/%.c, .objs/%.o, $(SRCS))
@@ -25,6 +25,10 @@ re: fclean
 
 ${NAME}: ${OBJS}
 	gcc ${INCLUDES} $^ -o $@ -lm
+
+norm:
+	clear
+	norminette ${SRCS}
 
 -include ${DEPS}
 

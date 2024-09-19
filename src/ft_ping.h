@@ -58,12 +58,8 @@ typedef union u_ping_msg {
 # define NS_MS 1000000
 # define NS_S  1000000000
 
-typedef enum e_flags {
-	NONE = 0,
-	QUIET = 1,
-	VERBOSE = 2,
-	HELP = 3
-}						t_flags;
+# define QUIET 1
+# define VERBOSE 2
 
 typedef enum e_exit_code {
 	UNKNOWN_ERROR = -1,
@@ -82,7 +78,7 @@ typedef struct s_app {
 	int					running;
 	t_exit_code			error;
 	t_str				app_name;
-	t_flags				flags;
+	int					flags;
 	t_str				target;
 	struct sockaddr_in	target_addr;
 	char				resolved_target[INET_ADDRSTRLEN + 1];

@@ -55,7 +55,7 @@ void	print_init(void)
 	print_s("): ");
 	print_u(sizeof(t_ping_msg));
 	print_s(" data bytes");
-	if (app()->flags == VERBOSE)
+	if ((app()->flags & VERBOSE) == VERBOSE)
 	{
 		id = getpid();
 		print_s(", id 0x");
@@ -72,7 +72,7 @@ void	print_pong(ssize_t size, t_i64 delta, t_ping_msg *msg)
 	print_s(" bytes from ");
 	print_s(app()->resolved_target);
 	print_s(": icmp_seq=");
-	print_u(((t_ping_head*)&msg->raw[IP_H_SZ])->un.echo.sequence);
+	print_u(((t_ping_head *)&msg->raw[IP_H_SZ])->un.echo.sequence);
 	print_s(" ttl=");
 	print_u(msg->header.ttl);
 	print_s(" time=");

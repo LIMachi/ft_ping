@@ -13,32 +13,7 @@
 #include "ft_ping.h"
 #include "alloc_less_argv_parser.h"
 
-t_app	*app(void)
-{
-	static t_app	sapp = {
-		.running = 1,
-		.error = OK,
-		.flags = NONE,
-		.target = NULL,
-		.sock = -1,
-		.sent = 0,
-		.received = 0,
-		.min = 0,
-		.max = 0,
-		.average = 0,
-		.da2 = 0
-	};
-
-	return (&sapp);
-}
-
-t_exit_code	error(t_exit_code code)
-{
-	app()->error = code;
-	return (code);
-}
-
-t_exit_code	usage(const char *name)
+int	usage(const char *name)
 {
 	print_s("Usage\n  ");
 	print_s(name);
@@ -51,12 +26,19 @@ t_exit_code	usage(const char *name)
 		"show extra packet information\n"
 		"  -q / --quiet                       "
 		"quiet output (only show statistics at the end)\n\n");
-	return (OK);
+	return (1);
 }
 
-int	finalize(void *state, int ret, const int argc, t_csa argv)
+unsigned int	matcher(const t_arg_parser_choice *const choice,
+	const char *const arg, void *data)
 {
-
+	if (choice->alias == 'h')
+		return (usage(app()->app_name));
+	else if (choice->alias == 'q')
+		app()->flags |= QUIET;
+	else if (choice->alias == 'v')
+		app()->flags |= VERBOSE;
+	return (0);
 }
 
 t_exit_code	args(const int argc, t_csa argv)
@@ -64,19 +46,24 @@ t_exit_code	args(const int argc, t_csa argv)
 	int							ret;
 	static t_arg_parser_node	root = {0, NULL, NULL};
 
+	app()->app_name = argv[0];
 	if (argc < 2)
 		return (usage(argv[0]));
 	root.choices = (t_arg_parser_choice [4]){
-	{0, 'h', "--help", 0, NULL, &root, NULL},
-	{0, 'q', "--quiet", 0, NULL, &root, NULL},
-	{0, 'v', "--verbose", 0, NULL, &root, NULL},
-	{-1}};
-	return (error(parse_argv(argc, argv, &root, NULL)));
+	{0, 'h', "--help", 0, &matcher, &root, NULL},
+	{0, 'q', "--quiet", 0, &matcher, &root, NULL},
+	{0, 'v', "--verbose", 0, &matcher, &root, NULL}, {-1}};
+	ret = parse_argv(argc - 1, &argv[1], &root, NULL);
+	if (ret < 0)
+		return (1);
+	if (ret < argc)
+		app()->target = argv[ret + 1];
+	return (0);
 }
 
 int	main(const int argc, t_str argv[])
 {
-	if (parse_args(argc, argv)/*args(argc, argv)*/)
+	if (args(argc, argv))
 		return (app()->error);
 	if (app()->target == NULL)
 	{

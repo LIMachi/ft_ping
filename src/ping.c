@@ -51,7 +51,7 @@ t_exit_code	send_ping(void)
 	{
 		--app()->sent;
 		print_e((t_str[4]){app()->app_name, ": socket error on send: ",
-				strerror(errno), NULL});
+			strerror(errno), NULL});
 		app()->error = SOCKET_ERROR;
 		return (SOCKET_ERROR);
 	}
