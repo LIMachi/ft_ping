@@ -45,8 +45,8 @@ typedef struct iphdr	t_ip_head;
 # define IP_H_SZ 20
 
 typedef union u_ping_packet {
-	t_u8		raw[PING_H_SZ + TIME_SZ];
 	t_ping_head	header;
+	t_u8		raw[PING_H_SZ + TIME_SZ];
 }						t_ping_packet;
 
 typedef union u_ping_msg {
@@ -64,7 +64,6 @@ typedef union u_ping_msg {
 typedef enum e_exit_code {
 	UNKNOWN_ERROR = -1,
 	OK = 0,
-	UNKNOWN_ARG,
 	MULTIPLE_DESTINATION,
 	MISSING_DESTINATION,
 	NEED_ROOT,
@@ -89,6 +88,11 @@ typedef struct s_app {
 	t_i64				max;
 	t_i64				average;
 	t_i64				da2;
+	int					pack_size;
+	int					preload;
+	float				interval;
+	int					deadline;
+	int					ttl;
 }						t_app;
 
 //main.c

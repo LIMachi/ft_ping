@@ -44,7 +44,6 @@ t_exit_code	resolve_sock(void)
 //tmp_sock is there because the norm fails to parse `app()->sock = `
 t_exit_code	connect_sock(void)
 {
-	const int	ttl = 64;
 	int			tmp_sock;
 
 	tmp_sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
@@ -56,7 +55,9 @@ t_exit_code	connect_sock(void)
 		return (SOCKET_ERROR);
 	}
 	app()->sock = tmp_sock;
-	if (setsockopt(tmp_sock, IPPROTO_IP, IP_TTL, &ttl,
+	if (app()->ttl > 255)
+		app()->ttl = 255;
+	if (setsockopt(tmp_sock, IPPROTO_IP, IP_TTL, &app()->ttl,
 			sizeof(int)) == -1)
 	{
 		print_e((t_str[4]){app()->app_name, ": socket error: ", strerror(errno),

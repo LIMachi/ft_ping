@@ -28,7 +28,10 @@ void	print_stats(void)
 	print_s(" packets transmitted, ");
 	print_u(app()->received);
 	print_s(" packets received, ");
-	print_u((100 - (app()->received * 100) / app()->sent));
+	if (app()->sent > 0)
+		print_u((100 - (app()->received * 100) / app()->sent));
+	else
+		print_s("0");
 	print_s("% packet loss\n");
 	if (app()->received > 0)
 	{
@@ -53,8 +56,10 @@ void	print_init(void)
 	print_s(" (");
 	print_s(app()->resolved_target);
 	print_s("): ");
-	print_u(sizeof(t_ping_msg));
-	print_s(" data bytes");
+	print_u(app()->pack_size);
+	print_s("(");
+	print_u(app()->pack_size + PING_H_SZ + IP_H_SZ);
+	print_s(") data bytes");
 	if ((app()->flags & VERBOSE) == VERBOSE)
 	{
 		id = getpid();

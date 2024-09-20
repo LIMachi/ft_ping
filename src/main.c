@@ -18,26 +18,51 @@ int	usage(const char *name)
 	print_s("Usage\n  ");
 	print_s(name);
 	print_s(" [options] <destination>\n\nOptions:\n"
-		"  <destination>                      "
+		"  <destination>                              "
 		"dns name or ip address\n"
-		"  -h / -u / -? / --help / --usage    "
+		"  -h / -u / -? / --help / --usage            "
 		"show this usage\n"
-		"  -v / --verbose                     "
-		"show extra packet information\n"
-		"  -q / --quiet                       "
-		"quiet output (only show statistics at the end)\n\n");
+		"  -v / --verbose                             "
+		"show extra packet information, list unexpected packets\n"
+		"  -q / --quiet                               "
+		"quiet output (only show statistics at the end)\n"
+		"  -s <s> / --packet-size <s> (default: 16)   "
+		"specify the size of the payload (not including the 8 bytes of header)"
+		"\n  -l <qty> / --preload <qty> (default: 0)    "
+		"send that quantity of packets as fast as possible on startup\n"
+		"  -i <sec> / --interval <sec> (default: 1)   "
+		"wait this many seconds between each request (defaults to 1)\n"
+		"  -c <sec> / --count <sec> (0: disable)      "
+		"wait to get this many response before stopping\n"
+		"  -t <r> / --ttl <r> (default: 64)           "
+		"set the ttl value of a packet (maximum number of routers it can go"
+		"through)\n\n");
 	return (1);
 }
 
 unsigned int	matcher(const t_arg_parser_choice *const choice,
 	const char *const arg, void *data)
 {
-	if (choice->alias == 'h')
+	if (choice->alias == 'h' || choice->alias == 'u' || choice->alias == '?')
 		return (usage(app()->app_name));
 	else if (choice->alias == 'q')
 		app()->flags |= QUIET;
 	else if (choice->alias == 'v')
 		app()->flags |= VERBOSE;
+	else if (choice->alias == 's')
+		app()->pack_size = atoi(arg);
+	else if (choice->alias == 'l')
+		app()->preload = atoi(arg);
+	else if (choice->alias == 'i')
+	{
+		app()->interval = atof(arg);
+		if (app()->interval < 0.01f)
+			app()->interval = 0.01f;
+	}
+	else if (choice->alias == 'c')
+		app()->deadline = atoi(arg);
+	else if (choice->alias == 't')
+		app()->ttl = atoi(arg);
 	return (0);
 }
 
@@ -49,15 +74,24 @@ t_exit_code	args(const int argc, t_csa argv)
 	app()->app_name = argv[0];
 	if (argc < 2)
 		return (usage(argv[0]));
-	root.choices = (t_arg_parser_choice [4]){
+	root.choices = (t_arg_parser_choice []){
 	{0, 'h', "--help", 0, &matcher, &root, NULL},
+	{0, 'u', "--usage", 0, &matcher, &root, NULL},
+	{0, '?', NULL, 0, &matcher, &root, NULL},
 	{0, 'q', "--quiet", 0, &matcher, &root, NULL},
-	{0, 'v', "--verbose", 0, &matcher, &root, NULL}, {-1}};
+	{0, 'v', "--verbose", 0, &matcher, &root, NULL},
+	{0, 's', "--packet-size", 1, &matcher, &root, NULL},
+	{0, 'l', "--preload", 1, &matcher, &root, NULL},
+	{0, 'i', "--interval", 1, &matcher, &root, NULL},
+	{0, 'c', "--count", 1, &matcher, &root, NULL},
+	{0, 't', "--ttl", 1, &matcher, &root, NULL}, {-1}};
 	ret = parse_argv(argc - 1, &argv[1], &root, NULL);
 	if (ret < 0)
 		return (1);
-	if (ret < argc)
+	if (ret + 1 < argc)
 		app()->target = argv[ret + 1];
+	if (ret + 2 < argc)
+		return (error(MULTIPLE_DESTINATION));
 	return (0);
 }
 
@@ -81,7 +115,7 @@ int	main(const int argc, t_str argv[])
 		return (app()->error);
 	set_sig_handler(SIGALRM, &sighandler);
 	set_sig_handler(SIGINT, &sighandler);
-	set_timer(1, 0);
+	set_timer((int)app()->interval, (int)(app()->interval * 1000000));
 	print_init();
 	while (app()->running && app()->error == OK)
 		receive_pong();

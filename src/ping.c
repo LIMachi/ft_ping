@@ -37,12 +37,8 @@ t_exit_code	send_ping(void)
 {
 	t_ping_packet	packet;
 
-	packet = (t_ping_packet){
-		.header = {
-		.type = ICMP_ECHO,
-		.un.echo = {
-		.id = getpid(),
-		.sequence = app()->sent++}}};
+	packet = (t_ping_packet){.header = {.type = ICMP_ECHO, .un.echo = {
+		.id = getpid(), .sequence = app()->sent++}}};
 	*(t_time*)&packet.raw[PING_H_SZ] = now();
 	packet.header.checksum = checksum(&packet, sizeof(t_ping_packet));
 	if (sendto(app()->sock, &packet, sizeof(t_ping_packet), 0,

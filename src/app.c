@@ -25,7 +25,12 @@ t_app	*app(void)
 		.min = 0,
 		.max = 0,
 		.average = 0,
-		.da2 = 0
+		.da2 = 0,
+		.pack_size = TIME_SZ,
+		.preload = 0,
+		.interval = 1,
+		.deadline = 0,
+		.ttl = 64
 	};
 
 	return (&sapp);

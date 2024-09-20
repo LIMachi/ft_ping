@@ -67,7 +67,9 @@ t_exit_code	receive_pong(void)
 		delta = delta_time(*(t_time *)&buffer.raw[IP_H_SZ + PING_H_SZ], now());
 		insert_pong(delta);
 		if ((app()->flags & QUIET) != QUIET)
-			print_pong(received, delta, &buffer);
+			print_pong(received - IP_H_SZ, delta, &buffer);
+		if (app()->deadline > 0 && app()->received >= app()->deadline)
+			app()->running = 0;
 	}
 	return (OK);
 }
