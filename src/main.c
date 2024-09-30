@@ -50,9 +50,13 @@ unsigned int	matcher(const t_arg_parser_choice *const choice,
 	else if (choice->alias == 'v')
 		app()->flags |= VERBOSE;
 	else if (choice->alias == 's')
-		app()->pack_size = atoi(arg);
+	{
+		app()->pack_size = (unsigned int)atoi(arg);
+		if (app()->pack_size > MAX_PAYLOAD_SZ)
+			app()->pack_size = MAX_PAYLOAD_SZ;
+	}
 	else if (choice->alias == 'l')
-		app()->preload = atoi(arg);
+		app()->preload = (unsigned int)atoi(arg);
 	else if (choice->alias == 'i')
 	{
 		app()->interval = atof(arg);
@@ -60,9 +64,9 @@ unsigned int	matcher(const t_arg_parser_choice *const choice,
 			app()->interval = 0.01f;
 	}
 	else if (choice->alias == 'c')
-		app()->deadline = atoi(arg);
+		app()->deadline = (unsigned int)atoi(arg);
 	else if (choice->alias == 't')
-		app()->ttl = atoi(arg);
+		app()->ttl = (unsigned int)atoi(arg);
 	return (0);
 }
 
@@ -95,6 +99,15 @@ t_exit_code	args(const int argc, t_csa argv)
 	return (0);
 }
 
+void	preload(void)
+{
+	while (app()->preload > 0 && app()->error == OK)
+	{
+		send_ping();
+		--app()->preload;
+	}
+}
+
 int	main(const int argc, t_str argv[])
 {
 	if (args(argc, argv))
@@ -113,10 +126,10 @@ int	main(const int argc, t_str argv[])
 	}
 	if (resolve_sock() || connect_sock())
 		return (app()->error);
-	set_sig_handler(SIGALRM, &sighandler);
-	set_sig_handler(SIGINT, &sighandler);
-	set_timer((int)app()->interval, (int)(app()->interval * 1000000));
+	set_sig_handler();
+	set_timer((int)app()->interval, (int)(app()->interval * 1000000) % 1000000);
 	print_init();
+	preload();
 	while (app()->running && app()->error == OK)
 		receive_pong();
 	print_stats();

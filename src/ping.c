@@ -33,15 +33,37 @@ t_u16	checksum(const void *const data, const size_t len)
 	return (~(t_u16)acc);
 }
 
+void	fill(char *buff, int len)
+{
+	char	c;
+
+	c = 'a';
+	while (len > 0)
+	{
+		buff[len] = c;
+		++c;
+		if (c > 'z')
+			c = 'a';
+		--len;
+	}
+}
+
 t_exit_code	send_ping(void)
 {
 	t_ping_packet	packet;
 
 	packet = (t_ping_packet){.header = {.type = ICMP_ECHO, .un.echo = {
 		.id = getpid(), .sequence = app()->sent++}}};
-	*(t_time*)&packet.raw[PING_H_SZ] = now();
-	packet.header.checksum = checksum(&packet, sizeof(t_ping_packet));
-	if (sendto(app()->sock, &packet, sizeof(t_ping_packet), 0,
+	if (app()->pack_size >= TIME_SZ)
+	{
+		*(t_time *) &packet.raw[PING_H_SZ] = now();
+		fill((char *)&packet.raw[PING_H_SZ + TIME_SZ],
+			app()->pack_size - TIME_SZ);
+	}
+	else
+		fill((char *)&packet.raw[PING_H_SZ], app()->pack_size);
+	packet.header.checksum = checksum(&packet, PING_H_SZ + app()->pack_size);
+	if (sendto(app()->sock, &packet, PING_H_SZ + app()->pack_size, 0,
 			(const struct sockaddr *)&app()->target_addr,
 			sizeof(struct sockaddr_in)) == -1)
 	{

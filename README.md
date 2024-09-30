@@ -21,8 +21,9 @@ Completion:
 
 Bonus:
 - [x] 1 allocation (the only one present is called by `getaddrinfo` and cannot be avoided)
-- [ ] s/packet-size option
-- [ ] l/preload option
+- [x] 42's norm compliant
+- [x] s/packet-size option
+- [x] l/preload option
 - [x] i/interval option
 - [x] c/count option
 - [x] t/ttl option

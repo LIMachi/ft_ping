@@ -12,18 +12,21 @@
 
 #include "ft_ping.h"
 
-void	set_sig_handler(int signal, void (*handler)(int))
-{
-	struct sigaction	runner;
-
-	runner = (struct sigaction){.sa_handler = handler};
-	sigaction(signal, &runner, NULL);
-}
-
 void	sighandler(int signal)
 {
 	if (signal == SIGALRM)
 		send_ping();
 	else if (signal == SIGINT)
 		app()->running = 0;
+}
+
+void	set_sig_handler(void)
+{
+	struct sigaction	alarm_runner;
+	struct sigaction	interupt_runner;
+
+	interupt_runner = (struct sigaction){.sa_handler = sighandler};
+	sigaction(SIGINT, &interupt_runner, NULL);
+	alarm_runner = (struct sigaction){.sa_handler = sighandler};
+	sigaction(SIGALRM, &alarm_runner, NULL);
 }

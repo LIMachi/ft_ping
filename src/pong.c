@@ -12,6 +12,7 @@
 
 #include "ft_ping.h"
 
+//TODO: checksum test, handle special cases in verbose mode
 int	valid_pong(void *packet, ssize_t size)
 {
 	struct icmphdr	*head;
@@ -19,7 +20,7 @@ int	valid_pong(void *packet, ssize_t size)
 	if (size < sizeof(struct icmphdr))
 		return (0);
 	head = packet;
-	if (head->type == ICMP_ECHOREPLY && size >= sizeof(t_ping_packet))
+	if (head->type == ICMP_ECHOREPLY && size >= PING_H_SZ)
 		return (head->un.echo.id == getpid());
 	return (0);
 }

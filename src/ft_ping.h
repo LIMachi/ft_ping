@@ -43,14 +43,16 @@ typedef struct iphdr	t_ip_head;
 # define TIME_SZ 16
 # define PING_H_SZ 8
 # define IP_H_SZ 20
+# define MAX_PACKET_SZ 65535
+# define MAX_PAYLOAD_SZ 65507
 
 typedef union u_ping_packet {
 	t_ping_head	header;
-	t_u8		raw[PING_H_SZ + TIME_SZ];
+	t_u8		raw[MAX_PACKET_SZ - IP_H_SZ];
 }						t_ping_packet;
 
 typedef union u_ping_msg {
-	t_u8		raw[IP_H_SZ + PING_H_SZ + TIME_SZ];
+	t_u8		raw[MAX_PACKET_SZ];
 	t_ip_head	header;
 }						t_ping_msg;
 
@@ -88,14 +90,14 @@ typedef struct s_app {
 	t_i64				max;
 	t_i64				average;
 	t_i64				da2;
-	int					pack_size;
-	int					preload;
+	unsigned int		pack_size;
+	unsigned int		preload;
 	float				interval;
-	int					deadline;
-	int					ttl;
+	unsigned int		deadline;
+	unsigned int		ttl;
 }						t_app;
 
-//main.c
+//app.c
 ///singleton to get access to the app
 ///(will be used to make this code comply with the 42's norm latter)
 t_app				*app(void);
@@ -147,13 +149,7 @@ t_exit_code			connect_sock(void);
 
 //signal.c
 ///
-void				sighandler(int signal);
-///
-void				set_sig_handler(int signal, void (*handler)(int));
-
-//args.c
-///
-t_exit_code			parse_args(int argc, t_str argv[]);
+void				set_sig_handler(void);
 
 //ping.c
 ///
