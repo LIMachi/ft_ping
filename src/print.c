@@ -12,75 +12,61 @@
 
 #include "ft_ping.h"
 
-void	print_ms(t_i64 ns)
-{
-	print_u((ns / NS_MS) % 1000);
-	write(1, ".", 1);
-	print_u3((ns / NS_US) % 1000);
-}
-
 void	print_stats(void)
 {
-	print_s("\n--- ");
-	print_s(app()->target);
-	print_s(" ping statistics ---\n");
-	print_u(app()->sent);
-	print_s(" packets transmitted, ");
-	print_u(app()->received);
-	print_s(" packets received, ");
+	t_i64		percent;
+	t_i64		stddev;
+	t_strbuff	buffs[11];
+
 	if (app()->sent > 0)
-		print_u((100 - (app()->received * 100) / app()->sent));
+		percent = (100 - (app()->received * 100) / app()->sent);
 	else
-		print_s("0");
-	print_s("% packet loss\n");
+		percent = 0;
+	print(1, (t_str[]){"\n--- ", app()->target, " ping statistics ---\n",
+		butoa(buffs[0], app()->sent, 10), " packets transmitted, ",
+		butoa(buffs[1], app()->received, 10), " packets received, ",
+		butoa(buffs[2], percent, 10), "% packet loss\n", NULL});
 	if (app()->received > 0)
 	{
-		print_s("round-trip min/avg/max/stddev = ");
-		print_ms(app()->min);
-		print_s("/");
-		print_ms(app()->average);
-		print_s("/");
-		print_ms(app()->max);
-		print_s("/");
-		print_ms((t_i64)sqrt((double)app()->da2 / (double)app()->received));
-		print_s(" ms\n");
+		stddev = (t_i64)sqrt((double)app()->da2 / (double)app()->received);
+		print(1, (t_str[]){"round-trip min/avg/max/stddev = ",
+			butoa(buffs[3], (app()->min / NS_MS) % 1000, 10), ".",
+			bu3(buffs[4], (app()->min / NS_US) % 1000), "/",
+			butoa(buffs[5], (app()->average / NS_MS) % 1000, 10), ".",
+			bu3(buffs[6], (app()->average / NS_US) % 1000), "/",
+			butoa(buffs[7], (app()->max / NS_MS) % 1000, 10), ".",
+			bu3(buffs[8], (app()->max / NS_US) % 1000), "/",
+			butoa(buffs[9], (stddev / NS_MS) % 1000, 10), ".",
+			bu3(buffs[10], (stddev / NS_US) % 1000), " ms\n", NULL});
 	}
 }
 
 void	print_init(void)
 {
-	int	id;
+	int			id;
+	t_strbuff	buffs[4];
 
-	print_s("PING ");
-	print_s(app()->target);
-	print_s(" (");
-	print_s(app()->resolved_target);
-	print_s("): ");
-	print_u(app()->pack_size);
-	print_s("(");
-	print_u(app()->pack_size + PING_H_SZ + IP_H_SZ);
-	print_s(") data bytes");
+	print(1, (t_str[]){"PING ", app()->target, " (", app()->resolved_target,
+		"): ", butoa(buffs[0], app()->pack_size, 10), "(",
+		butoa(buffs[1], app()->pack_size + PING_H_SZ + IP_H_SZ, 10),
+		") data bytes", NULL});
 	if ((app()->flags & VERBOSE) == VERBOSE)
 	{
 		id = getpid();
-		print_s(", id 0x");
-		print_x(id);
-		print_s(" = ");
-		print_u(id);
+		print(1, (t_str[]){", id 0x", butoa(buffs[2], id, 16), " = ",
+			butoa(buffs[3], id, 10), NULL});
 	}
 	write(1, "\n", 1);
 }
 
 void	print_pong(ssize_t size, t_i64 delta, t_ping_msg *msg)
 {
-	print_u(size);
-	print_s(" bytes from ");
-	print_s(app()->resolved_target);
-	print_s(": icmp_seq=");
-	print_u(((t_ping_head *)&msg->raw[IP_H_SZ])->un.echo.sequence);
-	print_s(" ttl=");
-	print_u(msg->header.ttl);
-	print_s(" time=");
-	print_ms(delta);
-	print_s(" ms\n");
+	t_strbuff	buffs[5];
+
+	print(1, (t_str[]){butoa(buffs[0], size, 10), " bytes from ",
+		app()->resolved_target, ": icmp_seq=", butoa(buffs[1],
+			((t_ping_head *) &msg->raw[IP_H_SZ])->un.echo.sequence, 10),
+		" ttl=", butoa(buffs[2], msg->header.ttl, 10), " time=",
+		butoa(buffs[3], (delta / NS_MS) % 1000, 10), ".",
+		bu3(buffs[4], (delta / NS_US) % 1000), " ms\n", NULL});
 }

@@ -23,8 +23,8 @@ t_exit_code	resolve_sock(void)
 
 	if (getaddrinfo(app()->target, NULL, &req, &info))
 	{
-		print_e((t_str[4]){app()->app_name, ": unknown target: ", app()->target,
-			NULL});
+		print(2, (t_str[]){app()->app_name, ": unknown target: ", app()->target,
+			"\n", NULL});
 		app()->error = UNKNOWN_TARGET;
 		return (UNKNOWN_TARGET);
 	}
@@ -33,8 +33,8 @@ t_exit_code	resolve_sock(void)
 	if (inet_ntop(AF_INET, &app()->target_addr.sin_addr,
 			app()->resolved_target, INET_ADDRSTRLEN) == NULL)
 	{
-		print_e((t_str[4]){app()->app_name, ": inet_ntop error: ",
-			strerror(errno), NULL});
+		print(2, (t_str[]){app()->app_name, ": inet_ntop error: ",
+			strerror(errno), "\n", NULL});
 		app()->error = INET_ERROR;
 		return (INET_ERROR);
 	}
@@ -49,8 +49,8 @@ t_exit_code	connect_sock(void)
 	tmp_sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (tmp_sock == -1)
 	{
-		print_e((t_str[4]){app()->app_name, ": socket error: ", strerror(errno),
-			NULL});
+		print(2, (t_str[]){app()->app_name, ": socket error: ", strerror(errno),
+			"\n", NULL});
 		app()->error = SOCKET_ERROR;
 		return (SOCKET_ERROR);
 	}
@@ -60,8 +60,8 @@ t_exit_code	connect_sock(void)
 	if (setsockopt(tmp_sock, IPPROTO_IP, IP_TTL, &app()->ttl,
 			sizeof(int)) == -1)
 	{
-		print_e((t_str[4]){app()->app_name, ": socket error: ", strerror(errno),
-			NULL});
+		print(2, (t_str[]){app()->app_name, ": socket error: ", strerror(errno),
+			"\n", NULL});
 		close(tmp_sock);
 		app()->error = SOCKET_ERROR;
 		return (SOCKET_ERROR);

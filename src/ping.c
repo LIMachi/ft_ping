@@ -36,16 +36,47 @@ t_u16	checksum(const void *const data, const size_t len)
 void	fill(char *buff, int len)
 {
 	char	c;
+	int		i;
 
+	i = 0;
 	c = 'a';
-	while (len > 0)
+	while (i < len)
 	{
-		buff[len] = c;
+		buff[i] = c;
 		++c;
 		if (c > 'z')
 			c = 'a';
-		--len;
+		++i;
 	}
+}
+
+int	check_fill(const char *buff, ssize_t len)
+{
+	char	c;
+	ssize_t	l;
+
+	if (len >= TIME_SZ)
+	{
+		len -= TIME_SZ;
+		buff += TIME_SZ;
+	}
+	l = 0;
+	c = 'a';
+	while (l < len)
+	{
+		if (buff[l] != c)
+		{
+			print(2, (t_str[]){app()->app_name, ": error: received pong has "
+				"malicious payload (passed checksum but payload is invalid)\n",
+				NULL});
+			return (0);
+		}
+		++c;
+		if (c > 'z')
+			c = 'a';
+		++l;
+	}
+	return (1);
 }
 
 t_exit_code	send_ping(void)
@@ -54,9 +85,10 @@ t_exit_code	send_ping(void)
 
 	packet = (t_ping_packet){.header = {.type = ICMP_ECHO, .un.echo = {
 		.id = getpid(), .sequence = app()->sent++}}};
+	app()->last_sent = now();
 	if (app()->pack_size >= TIME_SZ)
 	{
-		*(t_time *) &packet.raw[PING_H_SZ] = now();
+		*(t_time *) &packet.raw[PING_H_SZ] = app()->last_sent;
 		fill((char *)&packet.raw[PING_H_SZ + TIME_SZ],
 			app()->pack_size - TIME_SZ);
 	}
@@ -68,8 +100,8 @@ t_exit_code	send_ping(void)
 			sizeof(struct sockaddr_in)) == -1)
 	{
 		--app()->sent;
-		print_e((t_str[4]){app()->app_name, ": socket error on send: ",
-			strerror(errno), NULL});
+		print(2, (t_str[]){app()->app_name, ": socket error on send: ",
+			strerror(errno), "\n", NULL});
 		app()->error = SOCKET_ERROR;
 		return (SOCKET_ERROR);
 	}

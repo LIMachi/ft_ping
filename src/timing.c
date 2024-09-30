@@ -34,7 +34,8 @@ t_time	now(void)
 
 	if (clock_gettime(CLOCK_REALTIME, &out) == -1)
 	{
-		print_e((t_str[3]){"clock_gettime error: ", strerror(errno), NULL});
+		print(2, (t_str[]){"clock_gettime error: ", strerror(errno), "\n",
+			NULL});
 		exit(-1);
 	}
 	return (out);

@@ -30,7 +30,8 @@ t_app	*app(void)
 		.preload = 0,
 		.interval = 1,
 		.deadline = 0,
-		.ttl = 64
+		.ttl = 64,
+		.last_sent = {},
 	};
 
 	return (&sapp);

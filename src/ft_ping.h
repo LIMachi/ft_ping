@@ -31,6 +31,7 @@ typedef __uint32_t		t_u32;
 typedef __uint16_t		t_u16;
 typedef __uint8_t		t_u8;
 typedef const char*		t_str;
+typedef char 			t_strbuff[65];
 
 ///helper typedefs to not write 'struct X' everywhere
 //total size: 16 (no matter the platform or endian)
@@ -95,6 +96,7 @@ typedef struct s_app {
 	float				interval;
 	unsigned int		deadline;
 	unsigned int		ttl;
+	t_time				last_sent;
 }						t_app;
 
 //app.c
@@ -105,16 +107,12 @@ t_app				*app(void);
 t_exit_code			error(t_exit_code code);
 
 //print_utils.c
-///print multiple strings to the stderr fd
-void				print_e(t_str parts[]);
-///helper function to print a null terminated string
-void				print_s(t_str s);
-///helper function to print an unsigned int recursively
-void				print_u(t_i64 val);
-///print the 3 most sgnificant digits of a number
-void				print_u3(t_i64 val);
-///helper function to print an unsigned int recursively in hexadecimal
-void				print_x(t_i64 val);
+///print multiple strings, the array should be terminated with a null pointer
+void				print(int fd, t_str parts[]);
+///convert an unsigned int to a static string using the given base
+t_str				butoa(t_strbuff into, t_i64 val, t_i64 base);
+///get the 3 most significant digits of a number into a static string
+t_str				bu3(t_strbuff into, t_i64 val);
 
 //print.c
 ///print the header (recap of the target and packet size)
@@ -156,6 +154,8 @@ void				set_sig_handler(void);
 t_u16				checksum(const void *data, size_t len);
 ///
 t_exit_code			send_ping(void);
+///
+int					check_fill(const char *buff, ssize_t len);
 
 //pong.c
 ///

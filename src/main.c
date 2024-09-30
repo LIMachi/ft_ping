@@ -15,9 +15,8 @@
 
 int	usage(const char *name)
 {
-	print_s("Usage\n  ");
-	print_s(name);
-	print_s(" [options] <destination>\n\nOptions:\n"
+	print(1, (t_str []){"Usage\n  ", name, " [options] <destination>\n\n"
+		"Options:\n"
 		"  <destination>                              "
 		"dns name or ip address\n"
 		"  -h / -u / -? / --help / --usage            "
@@ -36,7 +35,7 @@ int	usage(const char *name)
 		"wait to get this many response before stopping\n"
 		"  -t <r> / --ttl <r> (default: 64)           "
 		"set the ttl value of a packet (maximum number of routers it can go"
-		"through)\n\n");
+		"through)\n\n", NULL});
 	return (1);
 }
 
@@ -114,14 +113,14 @@ int	main(const int argc, t_str argv[])
 		return (app()->error);
 	if (app()->target == NULL)
 	{
-		print_e((t_str[3]){app()->app_name,
-			": usage error: missing destination option", NULL});
+		print(2, (t_str[]){app()->app_name,
+			": usage error: missing destination option\n", NULL});
 		return (MISSING_DESTINATION);
 	}
 	if (getuid() != 0)
 	{
-		print_e((t_str[3]){app()->app_name,
-			": usage error: need to be run as root", NULL});
+		print(2, (t_str[]){app()->app_name,
+			": usage error: need to be run as root\n", NULL});
 		return (NEED_ROOT);
 	}
 	if (resolve_sock() || connect_sock())

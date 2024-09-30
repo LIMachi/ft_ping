@@ -3,7 +3,8 @@ OK - remove the use of pragma pack (not norm compliant): change how the buffer a
 OK - fix comments/todos in code
 OK - finish arg system using my code from ft_ssl
 OK - add bonuses
-fix verbose option
+OK - fix verbose option
+OK - received pong packet are not checksumed and the payload is not verified, they should be
 
 -- 42:
 OK - final norm check

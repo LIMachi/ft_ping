@@ -12,7 +12,7 @@
 
 #include "ft_ping.h"
 
-void	print_e(t_str parts[])
+void	print(int fd, t_str parts[])
 {
 	size_t	len;
 	int		i;
@@ -25,58 +25,68 @@ void	print_e(t_str parts[])
 		len = 0;
 		while (parts[i][len] != '\0')
 			++len;
-		write(2, parts[i], len);
+		write(fd, parts[i], len);
 		++i;
 	}
-	write(2, "\n", 1);
 }
 
-void	print_s(t_str s)
+static size_t	base_len(t_i64 val, t_i64 base)
 {
 	size_t	len;
 
-	if (s == NULL)
-		return ;
-	len = 0;
-	while (s[len] != '\0')
+	len = 1;
+	while (val >= base)
+	{
+		val /= base;
 		++len;
-	write(1, s, len);
+	}
+	return (len);
 }
 
-void	print_u(t_i64 val)
+t_str	butoa(t_strbuff into, t_i64 val, t_i64 base)
 {
-	if (val >= 10)
-		print_u(val / 10);
-	write(1, &"0123456789"[val % 10], 1);
+	const char	char_set[17] = "0123456789ABCDEF";
+	size_t		len;
+
+	if (base < 2 || base > 16 || val < 0)
+	{
+		into[0] = 'e';
+		into[1] = 'r';
+		into[2] = 'r';
+		into[3] = '\0';
+		return (into);
+	}
+	len = base_len(val, base);
+	into[len] = '\0';
+	while (val >= base)
+	{
+		into[--len] = char_set[val % base];
+		val /= base;
+	}
+	into[0] = char_set[val];
+	return (into);
 }
 
-void	print_x(t_i64 val)
+t_str	bu3(t_strbuff into, t_i64 val)
 {
-	if (val >= 0x10)
-		print_x(val >> 4);
-	write(1, &"0123456789ABCDEF"[val & 0xF], 1);
-}
-
-void	print_u3(t_i64 val)
-{
-	char			buff[3];
 	unsigned int	i;
 
-	buff[0] = '0';
-	buff[1] = '0';
-	buff[2] = '0';
+	into[0] = '0';
+	into[1] = '0';
+	into[2] = '0';
+	into[3] = '\0';
 	i = 3;
 	while (val > 0)
 	{
 		if (i > 0)
-			buff[--i] = "0123456789"[val % 10];
+			into[--i] = "0123456789"[val % 10];
 		else
 		{
-			buff[2] = buff[1];
-			buff[1] = buff[0];
-			buff[0] = "0123456789"[val % 10];
+			into[2] = into[1];
+			into[1] = into[0];
+			into[0] = "0123456789"[val % 10];
 		}
 		val /= 10;
 	}
-	write(1, buff, 3);
+	return (into);
 }
